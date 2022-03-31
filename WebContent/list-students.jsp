@@ -1,15 +1,13 @@
-<%@ page import="java.util.*, com.stgcodes.web.jdbc.*" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <!DOCTYPE html>
 
 <html>
 
 <head>
 	<title>Student Tracker App</title>
+	
+	<link type="text/css" rel="stylesheet" href="css/style.css">
 </head>
-
-<%
-	List<Student> students = (List<Student>) request.getAttribute("STUDENTS");
-%>
 
 <body>
 
@@ -28,13 +26,15 @@
 					<th>Email</th>
 				</tr>
 				
-				<% for(Student student: students) { %>
+				<c:forEach var="student" items="${ STUDENTS }">
+				
 					<tr>
-						<td> <%= student.getFirstName() %> </td>
-						<td> <%= student.getLastName() %> </td>
-						<td> <%= student.getEmail() %> </td>
+						<td> ${student.firstName} </td>
+						<td> ${student.lastName} </td>
+						<td> ${student.email} </td>
 					</tr>
-				<% } %>
+					
+				</c:forEach>
 			</table>
 		</div>
 	</div>
