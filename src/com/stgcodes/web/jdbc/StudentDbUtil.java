@@ -1,7 +1,9 @@
 package com.stgcodes.web.jdbc;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
@@ -44,13 +46,94 @@ public class StudentDbUtil {
 			}
 
 			return students;
-		} 
-//		catch (Exception e) {
-//			e.printStackTrace();
-//		} 
-		finally {
+		} finally {
 			close(connection, statement, resultSet);
 		}
+	}
+	
+	public Student getStudent(String studentId) throws Exception {
+		Student student = null;
+		
+		Connection connection = null;
+		PreparedStatement statement = null;
+		ResultSet resultSet = null;
+		int id;
+		
+		try {
+			id = Integer.parseInt(studentId);
+			
+			connection = dataSource.getConnection();
+			
+			String sql = "select * from student where id=?";
+			
+			statement = connection.prepareStatement(sql);
+			
+			statement.setInt(1, id);
+			
+			resultSet = statement.executeQuery();
+			
+			if(resultSet.next()) {
+				String firstName = resultSet.getString("first_name");
+				String lastName = resultSet.getString("last_name");
+				String email = resultSet.getString("email");
+				
+				student = new Student(id, firstName, lastName, email);
+			} else {
+				throw new Exception("Could not find student ID: " + id);
+			}
+			
+			return student;
+		} finally {
+			close(connection, statement, resultSet);
+		}
+	}
+	
+	public void addStudent(Student student) throws Exception {
+		Connection connection = null;
+		PreparedStatement statement = null;
+		
+		try {
+			connection = dataSource.getConnection();
+			
+			String sql = "insert into student "
+					+ "(first_name, last_name, email) "
+					+ "values (?, ?, ?)";
+			
+			statement = connection.prepareStatement(sql);
+			
+			statement.setString(1,  student.getFirstName());
+			statement.setString(2,  student.getLastName());
+			statement.setString(3,  student.getEmail());
+			
+			statement.execute();
+		} finally {
+			close(connection, statement, null);
+		}
+	}
+	
+	public void updateStudent(Student student) throws Exception {
+		Connection connection = null;
+		PreparedStatement statement = null;
+		
+		try {
+			connection = dataSource.getConnection();
+			
+			String sql = "update student "
+					+ "set first_name=?, last_name=?, email=? "
+					+ "where id=?";
+			
+			statement = connection.prepareStatement(sql);
+			
+			statement.setString(1, student.getFirstName());
+			statement.setString(2, student.getLastName());
+			statement.setString(3, student.getEmail());
+			statement.setInt(4, student.getId());
+			
+			statement.execute();
+		} finally {
+			close(connection, statement, null);
+		}
+		
 	}
 
 	private void close(Connection connection, Statement statement, ResultSet resultSet) {
@@ -71,5 +154,4 @@ public class StudentDbUtil {
 		}
 
 	}
-
 }

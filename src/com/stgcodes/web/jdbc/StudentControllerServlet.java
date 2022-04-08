@@ -36,7 +36,28 @@ public class StudentControllerServlet extends HttpServlet {
 			throws ServletException, IOException {
 
 		try {
-			listStudents(request, response);
+			String command = request.getParameter("command");
+					
+			if(command == null) {
+				command="LIST";
+			}
+			
+			switch(command) {
+			case "LIST":
+				listStudents(request, response);
+				break;
+			case "ADD":
+				addStudent(request, response);
+				break;
+			case "LOAD":
+				loadStudent(request, response);
+				break;
+			case "UPDATE":
+				updateStudent(request, response);
+				break;
+			default:
+				listStudents(request, response);
+			}
 		} catch (Exception e) {
 			throw new ServletException(e);
 		}
@@ -49,6 +70,42 @@ public class StudentControllerServlet extends HttpServlet {
 
 		RequestDispatcher dispatcher = request.getRequestDispatcher("/list-students.jsp");
 		dispatcher.forward(request, response);
+	}
+	
+	private void addStudent(HttpServletRequest request, HttpServletResponse response) throws Exception {
+		String firstName = request.getParameter("firstName");
+		String lastName = request.getParameter("lastName");
+		String email = request.getParameter("email");
+		
+		Student student = new Student(firstName, lastName, email);
+		
+		studentDbUtil.addStudent(student);
+		
+		listStudents(request, response);
+	}
+	
+	private void loadStudent(HttpServletRequest request, HttpServletResponse response) throws Exception {
+		String studentId = request.getParameter("studentId");
+		
+		Student student = studentDbUtil.getStudent(studentId);
+		
+		request.setAttribute("STUDENT", student);
+		
+		RequestDispatcher dispatcher = request.getRequestDispatcher("/update-student-form.jsp");
+		dispatcher.forward(request, response);
+	}
+	
+	private void updateStudent(HttpServletRequest request, HttpServletResponse response) throws Exception {
+		int id = Integer.parseInt(request.getParameter("studentId"));
+		String firstName = request.getParameter("firstName");
+		String lastName = request.getParameter("lastName");
+		String email = request.getParameter("email");
+		
+		Student student = new Student(id, firstName, lastName, email);
+		
+		studentDbUtil.updateStudent(student);
+		
+		listStudents(request, response);
 	}
 
 }
